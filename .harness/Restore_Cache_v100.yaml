@@ -1,0 +1,15 @@
+template:
+    name: Restore Cache
+    identifier: Restore_Cache
+    versionLabel: v1.0.0
+    type: Step
+    projectIdentifier: Sonar
+    orgIdentifier: default
+    spec:
+        type: RestoreCacheS3
+        spec:
+            connectorRef: org.AWS
+            region: eu-west-2
+            bucket: mansong-maven
+            key: sonar
+            archiveFormat: Tar
