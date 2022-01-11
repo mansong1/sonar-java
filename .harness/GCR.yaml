@@ -1,0 +1,12 @@
+connector:
+  name: GCR
+  identifier: GCR
+  description:
+  orgIdentifier: default
+  projectIdentifier: Sonar
+  type: DockerRegistry
+  spec:
+    dockerRegistryUrl: gcr.io
+    providerType: Other
+    auth:
+      type: Anonymous
