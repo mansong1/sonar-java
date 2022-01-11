@@ -51,6 +51,10 @@ pipeline:
                                         spec:
                                             paths:
                                                 - "**/*.xml"
+                                    resources:
+                                        limits:
+                                            memory: 2Gi
+                                            cpu: "2.0"
                           - step:
                                 type: Run
                                 name: Build
