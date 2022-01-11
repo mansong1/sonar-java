@@ -1,0 +1,84 @@
+pipeline:
+    name: sonar-java
+    identifier: sonarjava
+    projectIdentifier: Sonar
+    orgIdentifier: default
+    tags: {}
+    properties:
+        ci:
+            codebase:
+                connectorRef: org.Github
+                repoName: sonar-java
+                build: <+input>
+    stages:
+        - stage:
+              name: build
+              identifier: build
+              type: CI
+              spec:
+                  cloneCodebase: true
+                  infrastructure:
+                      type: KubernetesDirect
+                      spec:
+                          connectorRef: org.GKE
+                          namespace: harness-builds
+                  execution:
+                      steps:
+                          - step:
+                                type: RestoreCacheS3
+                                name: Restore Maven Cache
+                                identifier: Restore_Maven_Cache
+                                spec:
+                                    connectorRef: org.AWS
+                                    region: eu-west-1
+                                    bucket: mansong-maven
+                                    key: key
+                                    archiveFormat: Tar
+                          - step:
+                                type: Run
+                                name: Check Licence Compliance
+                                identifier: Check_Licence_Compliance
+                                spec:
+                                    connectorRef: org.Dockerhub
+                                    image: gcr.io/language-team/base-jdk16:latest
+                                    command: |-
+                                        #!/bin/bash
+                                        set -euo pipefail
+
+                                        # See https://xtranet.sonarsource.com/display/DEV/Open+Source+Licenses
+
+                                        mvn org.codehaus.mojo:license-maven-plugin:aggregate-add-third-party \
+                                          -Dlicense.missingFile=$(pwd)/missing-dep-licenses.properties \
+                                          -DuseMissingFile \
+                                          -Dlicense.overrideUrl=file://$(pwd)/override-dep-licenses.properties
+                          - step:
+                                type: Run
+                                name: CleanUp
+                                identifier: CleanUp
+                                spec:
+                                    connectorRef: org.Dockerhub
+                                    image: busybox:latest
+                                    command: |-
+                                        #!/bin/sh
+
+                                        M2_REPO=${HOME}/.m2
+                                        OLDFILES=/tmp/deleted_artifacts.txt
+                                        AGE=181 # more or less 6 months and it's a palindromic prime number, so it's cool
+
+                                        echo "==== To be Deleted Jars ====" >> ${OLDFILES}
+                                        find "${M2_REPO}" -name '*-SNAPSHOT*jar' -atime +${AGE} -exec dirname {} \; >> ${OLDFILES}
+
+                                        echo "==== To be Deleted Wars/Ears ====" >> ${OLDFILES}
+                                        find "${M2_REPO}" -name '*-SNAPSHOT*war' -atime +${AGE} -exec dirname {} \; >> ${OLDFILES}
+                                        find "${M2_REPO}" -name '*-SNAPSHOT*ear' -atime +${AGE} -exec dirname {} \; >> ${OLDFILES}
+
+                                        echo "==== To be Deleted APKs ====" >> ${OLDFILES}
+                                        find "${M2_REPO}" -name '*-SNAPSHOT*apk' -atime +${AGE} -exec dirname {} \; >> ${OLDFILES}
+                                        find "${M2_REPO}" -name '*-SNAPSHOT*apksources' -atime +${AGE} -exec dirname {} \; >> ${OLDFILES}
+                                        find "${M2_REPO}" -name '*-SNAPSHOT*apklib' -atime +${AGE} -exec dirname {} \; >> ${OLDFILES}
+
+                                        for x in `cat ${OLDFILES}`; do rm -rf "$x"; done
+
+                                        # Just as final cleanup.
+                                        echo "==== Empty Directories ====" >> ${OLDFILES}
+                                        find "${M2_REPO}" -type d -empty -exec rmdir {} \; >> ${OLDFILES}
