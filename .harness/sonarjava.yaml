@@ -33,7 +33,7 @@ pipeline:
                                     region: eu-west-2
                                     bucket: mansong-maven
                                     key: sonar
-                                    archiveFormat: Tar
+                                    archiveFormat: Gzip
                           - step:
                                 type: Run
                                 name: Check Licence Compliance
@@ -93,6 +93,7 @@ pipeline:
                                     key: sonar
                                     sourcePaths:
                                         - ~/.m2/repository
-                                    archiveFormat: Tar
+                                    archiveFormat: Gzip
+                                    override: true
                   sharedPaths:
                       - /harness
