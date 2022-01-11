@@ -95,5 +95,3 @@ pipeline:
                                         - ~/.m2/repository
                                     archiveFormat: Gzip
                                     override: true
-                  sharedPaths:
-                      - /harness
