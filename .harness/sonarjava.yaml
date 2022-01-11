@@ -39,8 +39,8 @@ pipeline:
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
                                 spec:
-                                    connectorRef: org.GCP
-                                    image: language-team/base-jdk16:latest
+                                    connectorRef: org.Dockerhub
+                                    image: maven:3.6.3-jdk-16-slim
                                     command: |-
                                         #!/bin/bash
                                         set -euo pipefail
