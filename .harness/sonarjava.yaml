@@ -39,7 +39,7 @@ pipeline:
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
                                 spec:
-                                    connectorRef: org.Dockerhub
+                                    connectorRef: org.GCP
                                     image: gcr.io/language-team/base-jdk16:latest
                                     command: |-
                                         #!/bin/bash
