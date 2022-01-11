@@ -46,6 +46,11 @@ pipeline:
                                     args: test
                                     packages: com.sonar.
                                     runOnlySelectedTests: true
+                                    reports:
+                                        type: JUnit
+                                        spec:
+                                            paths:
+                                                - "**/*.xml"
                           - step:
                                 type: Run
                                 name: Build
