@@ -67,7 +67,7 @@ pipeline:
                                     bucket: mansong-maven
                                     key: sonar
                                     sourcePaths:
-                                        - ~/.m2/repository
+                                        - harness/.m2/repository
                                     archiveFormat: Gzip
                                     override: true
               variables:
