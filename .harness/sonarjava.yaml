@@ -82,3 +82,15 @@ pipeline:
                                         # Just as final cleanup.
                                         echo "==== Empty Directories ====" >> ${OLDFILES}
                                         find "${M2_REPO}" -type d -empty -exec rmdir {} \; >> ${OLDFILES}
+                          - step:
+                                type: SaveCacheS3
+                                name: Save Maven Cache
+                                identifier: Save_Maven_Cache
+                                spec:
+                                    connectorRef: org.AWS
+                                    region: eu-west-1
+                                    bucket: mansong-maven
+                                    key: key
+                                    sourcePaths:
+                                        - .m2/repository
+                                    archiveFormat: Tar
