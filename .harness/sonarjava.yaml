@@ -94,3 +94,5 @@ pipeline:
                                     sourcePaths:
                                         - .m2/repository
                                     archiveFormat: Tar
+                  sharedPaths:
+                      - /harness
