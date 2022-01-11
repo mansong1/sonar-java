@@ -35,22 +35,11 @@ pipeline:
                                     key: sonar
                                     archiveFormat: Gzip
                           - step:
-                                type: Run
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
-                                spec:
-                                    connectorRef: org.Dockerhub
-                                    image: <+build.variables.MAVEN_IMAGE>
-                                    command: |-
-                                        #!/bin/bash
-                                        set -euo pipefail
-
-                                        # See https://xtranet.sonarsource.com/display/DEV/Open+Source+Licenses
-
-                                        mvn org.codehaus.mojo:license-maven-plugin:aggregate-add-third-party \
-                                          -Dlicense.missingFile=$(pwd)/missing-dep-licenses.properties \
-                                          -DuseMissingFile \
-                                          -Dlicense.overrideUrl=file://$(pwd)/override-dep-licenses.properties
+                                template:
+                                    templateRef: check_licence_compliance
+                                    versionLabel: v1.0.0
                           - step:
                                 name: CleanUp
                                 identifier: CleanUp
