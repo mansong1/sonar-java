@@ -1,0 +1,17 @@
+template:
+    name: Save Maven Cache
+    identifier: Save_Maven_Cache
+    versionLabel: v1.0.0
+    type: Step
+    projectIdentifier: Sonar
+    orgIdentifier: default
+    spec:
+        type: SaveCacheS3
+        spec:
+            connectorRef: org.AWS
+            region: eu-west-1
+            bucket: mansong-maven
+            key: sonar
+            sourcePaths:
+                - ~/.m2/repository
+            archiveFormat: Tar
