@@ -13,6 +13,6 @@ template:
             command: |-
                 #!/bin/sh
 
-                rm -rf "$HOME/.m2/repository/org/sonarsource/"
+                rm -rf "harness/.m2/repository/org/sonarsource/"
 
-                find ~/.m2 -name resolver-status.properties -delete
+                find harness/.m2 -name resolver-status.properties -delete
