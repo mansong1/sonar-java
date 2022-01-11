@@ -40,7 +40,7 @@ pipeline:
                                 identifier: Check_Licence_Compliance
                                 spec:
                                     connectorRef: org.Dockerhub
-                                    image: maven:3.6.3-jdk-16-slim
+                                    image: <+build.variables.MAVEN_IMAGE>
                                     command: |-
                                         #!/bin/bash
                                         set -euo pipefail
@@ -95,3 +95,7 @@ pipeline:
                                         - ~/.m2/repository
                                     archiveFormat: Gzip
                                     override: true
+              variables:
+                  - name: MAVEN_IMAGE
+                    type: String
+                    value: 3.8.3-openjdk-16-slim
