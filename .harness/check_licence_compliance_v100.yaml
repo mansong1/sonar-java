@@ -9,7 +9,7 @@ template:
         type: Run
         spec:
             connectorRef: org.Dockerhub
-            image: gcr.io/language-team/base-jdk16:latest
+            image: <+build.variables.MAVEN_IMAGE>
             command: |-
                 #!/bin/bash
                 set -euo pipefail
