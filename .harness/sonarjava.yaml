@@ -36,7 +36,7 @@ pipeline:
                                     archiveFormat: Gzip
                           - step:
                                 type: RunTests
-                                name: Run TI
+                                name: Run Tests
                                 identifier: Run_TI
                                 spec:
                                     connectorRef: org.Dockerhub
