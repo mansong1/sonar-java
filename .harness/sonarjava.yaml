@@ -40,7 +40,7 @@ pipeline:
                                 identifier: Check_Licence_Compliance
                                 spec:
                                     connectorRef: org.GCP
-                                    image: gcr.io/language-team/base-jdk16:latest
+                                    image: language-team/base-jdk16:latest
                                     command: |-
                                         #!/bin/bash
                                         set -euo pipefail
