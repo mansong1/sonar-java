@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -22,12 +22,14 @@ package org.sonar.java.checks;
 import org.junit.jupiter.api.Test;
 import org.sonar.java.checks.verifier.CheckVerifier;
 
+import static org.sonar.java.checks.verifier.TestUtils.testSourcesPath;
+
 class JacksonDeserializationCheckTest {
 
   @Test
   void test() {
     CheckVerifier.newVerifier()
-      .onFile("src/test/files/checks/JacksonDeserialization.java")
+      .onFile(testSourcesPath("checks/JacksonDeserializationCheck.java"))
       .withCheck(new JacksonDeserializationCheck())
       .verifyIssues();
   }
@@ -35,7 +37,7 @@ class JacksonDeserializationCheckTest {
   @Test
   void test_no_semantic() {
     CheckVerifier.newVerifier()
-      .onFile("src/test/files/checks/JacksonDeserialization.java")
+      .onFile(testSourcesPath("checks/JacksonDeserializationCheck.java"))
       .withCheck(new JacksonDeserializationCheck())
       .withoutSemantic()
       .verifyNoIssues();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2021 SonarSource SA - mailto:info AT sonarsource DOT com
+ * Copyright (C) 2012-2022 SonarSource SA - mailto:info AT sonarsource DOT com
  * This code is released under [MIT No Attribution](https://opensource.org/licenses/MIT-0) license.
  */
 package org.sonar.samples.java;
@@ -24,7 +24,7 @@ class MyJavaRulesDefinitionTest {
     rulesDefinition.define(context);
     RulesDefinition.Repository repository = context.repository(MyJavaRulesDefinition.REPOSITORY_KEY);
 
-    assertThat(repository.name()).isEqualTo("MyCompany Custom Repository");
+    assertThat(repository.name()).isEqualTo(MyJavaRulesDefinition.REPOSITORY_NAME);
     assertThat(repository.language()).isEqualTo("java");
     assertThat(repository.rules()).hasSize(RulesList.getChecks().size());
     assertThat(repository.rules().stream().filter(Rule::template)).isEmpty();

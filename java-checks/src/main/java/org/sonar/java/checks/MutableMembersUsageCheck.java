@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -61,7 +61,9 @@ public class MutableMembersUsageCheck extends BaseTreeVisitor implements JavaFil
   private static final MethodMatchers UNMODIFIABLE_COLLECTION_CALL = MethodMatchers.or(
     MethodMatchers.create().ofType(type -> MutableMembersUsageCheck.containsImmutableLikeTerm(type.name())).anyName().withAnyParameters().build(),
     MethodMatchers.create().ofAnyType().name(MutableMembersUsageCheck::containsImmutableLikeTerm).withAnyParameters().build(),
-    MethodMatchers.create().ofTypes("java.util.Collections").name(name -> name.startsWith("unmodifiable") || name.startsWith("singleton")).withAnyParameters().build(),
+    MethodMatchers.create().ofTypes("java.util.Collections")
+      .name(name -> name.startsWith("singleton") || name.startsWith("empty"))
+      .withAnyParameters().build(),
     MethodMatchers.create().ofTypes("java.util.Set", "java.util.List").names("of", "copyOf").withAnyParameters().build()
   );
 
@@ -200,6 +202,10 @@ public class MutableMembersUsageCheck extends BaseTreeVisitor implements JavaFil
   }
 
   private static boolean isMutableType(ExpressionTree expressionTree) {
+    if (expressionTree.is(Tree.Kind.NULL_LITERAL)) {
+      // In case of incomplete semantic, working with "nulltype" returns strange results, we can return early as the null will never be mutable anyway.
+      return false;
+    }
     if (expressionTree.is(Tree.Kind.METHOD_INVOCATION) && UNMODIFIABLE_COLLECTION_CALL.matches((MethodInvocationTree) expressionTree)) {
       return false;
     }

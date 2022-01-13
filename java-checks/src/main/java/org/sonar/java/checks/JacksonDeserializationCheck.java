@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -74,7 +74,7 @@ public class JacksonDeserializationCheck extends IssuableSubscriptionVisitor {
   private static boolean isAnnotationOnClassOrField(AnnotationTree annotationTree) {
     if (annotationTree.parent().is(Tree.Kind.MODIFIERS)) {
       Tree modifiers = annotationTree.parent();
-      return modifiers.parent().is(Tree.Kind.CLASS, Tree.Kind.VARIABLE);
+      return modifiers.parent().is(Tree.Kind.CLASS, Tree.Kind.INTERFACE, Tree.Kind.VARIABLE);
     }
     return false;
   }

@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -56,7 +56,9 @@ public class StaticMemberAccessCheck extends IssuableSubscriptionVisitor {
     if (symbol.isStatic()  && !isListOrSetOf(mse)) {
       ExpressionTree expression = mse.expression();
       Type staticType = symbol.owner().type();
-      if (!expression.symbolType().erasure().equals(staticType.erasure())) {
+      Type expressionType = expression.symbolType();
+      if (!staticType.isUnknown() && !expressionType.isUnknown()
+        && !expressionType.erasure().equals(staticType.erasure())) {
         QuickFixHelper.newIssue(context)
           .forRule(this)
           .onTree(mse.identifier())

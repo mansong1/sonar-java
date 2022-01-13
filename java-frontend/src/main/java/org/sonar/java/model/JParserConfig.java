@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -105,7 +105,7 @@ public abstract class JParserConfig {
   }
 
   public ASTParser astParser() {
-    ASTParser astParser = ASTParser.newParser(AST.JLS_Latest);
+    ASTParser astParser = ASTParser.newParser(AST.getJLSLatest());
     Map<String, String> options = new HashMap<>();
     options.put(JavaCore.COMPILER_COMPLIANCE, javaVersion);
     options.put(JavaCore.COMPILER_SOURCE, javaVersion);
@@ -114,7 +114,7 @@ public abstract class JParserConfig {
       options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, "enabled");
     }
     // enabling all supported compiler warnings
-    JWarning.Type.compilerOptions()
+    JProblem.Type.compilerOptions()
       .forEach(option -> options.put(option, "warning"));
 
     astParser.setCompilerOptions(options);

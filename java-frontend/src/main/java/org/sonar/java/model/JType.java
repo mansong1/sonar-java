@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@ import org.sonar.plugins.java.api.semantic.Type;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 final class JType implements Type, Type.ArrayType {
@@ -98,7 +99,7 @@ final class JType implements Type, Type.ArrayType {
   @Override
   public boolean isPrimitive(Primitives primitive) {
     // TODO suboptimal
-    return primitive.name().toLowerCase().equals(fullyQualifiedName());
+    return primitive.name().toLowerCase(Locale.ROOT).equals(fullyQualifiedName());
   }
 
   @Override

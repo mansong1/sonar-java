@@ -58,6 +58,11 @@ class Fields {
     private int foo; // NoIssue
   }
 
+  @lombok.SuperBuilder
+  class SuperBuilder { // WithIssue
+    private int foo; // NoIssue
+  }
+
   class Builder2 { // WithIssue
     private int foo; // WithIssue
   }
@@ -360,6 +365,16 @@ class LombokVal {
   boolean s2175_valid(java.util.List<String> words) {
     Integer y = 42;
     return words.contains(y); // WithIssue
+  }
+
+  void S5845(String s) {
+    lombok.val y = "Hello World";
+    org.junit.Assert.assertEquals(y, s); // NoIssue
+  }
+
+  boolean S5845_valid(String s) {
+    Integer y = 42;
+    org.junit.Assert.assertEquals(y, s); // WithIssue
   }
 }
 

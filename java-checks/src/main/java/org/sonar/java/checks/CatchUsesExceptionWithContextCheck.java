@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -186,7 +186,7 @@ public class CatchUsesExceptionWithContextCheck extends BaseTreeVisitor implemen
   @Override
   public void visitMethodInvocation(MethodInvocationTree mit) {
     super.visitMethodInvocation(mit);
-    if (LOGGING_METHODS.matches(mit)) {
+    if (LOGGING_METHODS.matches(mit) || mit.symbol().isUnknown()) {
       usageStatusStack.forEach(usageStatus -> usageStatus.addLoggingMethodInvocation(mit));
     }
   }

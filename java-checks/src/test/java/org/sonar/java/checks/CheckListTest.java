@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -80,7 +80,7 @@ class CheckListTest {
         count++;
       }
     }
-    assertThat(CheckList.getChecks().size()).isEqualTo(count + SE_CHEKS.size());
+    assertThat(CheckList.getChecks()).hasSize(count + SE_CHEKS.size());
   }
 
   private static class CustomRulesDefinition implements RulesDefinition {

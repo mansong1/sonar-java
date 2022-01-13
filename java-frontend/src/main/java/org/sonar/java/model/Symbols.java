@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -273,11 +273,6 @@ public class Symbols {
     @Override
     public List<Type> thrownTypes() {
       return Collections.emptyList();
-    }
-
-    @Override
-    public Symbol.MethodSymbol overriddenSymbol() {
-      return null;
     }
 
     @Override

@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -42,6 +42,7 @@ import org.sonar.java.checks.UtilityClassWithPublicConstructorCheck;
 import org.sonar.java.checks.helpers.ExpressionsHelper;
 import org.sonar.java.checks.naming.BadFieldNameCheck;
 import org.sonar.java.checks.spring.SpringComponentWithNonAutowiredMembersCheck;
+import org.sonar.java.checks.tests.AssertionTypesCheck;
 import org.sonar.java.checks.unused.UnusedPrivateFieldCheck;
 import org.sonarsource.analyzer.commons.collections.SetUtils;
 import org.sonar.java.se.checks.XxeProcessingCheck;
@@ -60,6 +61,7 @@ public class LombokFilter extends BaseTreeVisitorIssueFilter {
 
   private static final Set<Class<? extends JavaCheck>> FILTERED_RULES = SetUtils.immutableSetOf(
     // alphabetically sorted
+    /* S5845 */ AssertionTypesCheck.class,
     /* S1258 */ AtLeastOneConstructorCheck.class,
     /* .S116 */ BadFieldNameCheck.class,
     /* S2175 */ CollectionInappropriateCallsCheck.class,
@@ -79,6 +81,7 @@ public class LombokFilter extends BaseTreeVisitorIssueFilter {
     /* S2755 */ XxeProcessingCheck.class);
 
   private static final String LOMBOK_BUILDER = "lombok.Builder";
+  private static final String LOMBOK_SUPER_BUILDER = "lombok.SuperBuilder";
   private static final String LOMBOK_BUILDER_DEFAULT = "lombok.Builder$Default";
   private static final String LOMBOK_VAL = "lombok.val";
   private static final String LOMBOK_VALUE = "lombok.Value";
@@ -89,6 +92,7 @@ public class LombokFilter extends BaseTreeVisitorIssueFilter {
     "lombok.Getter",
     "lombok.Setter",
     LOMBOK_BUILDER,
+    LOMBOK_SUPER_BUILDER,
     "lombok.ToString",
     "lombok.AllArgsConstructor",
     "lombok.NoArgsConstructor",
@@ -157,7 +161,7 @@ public class LombokFilter extends BaseTreeVisitorIssueFilter {
     }
 
     // Exclude final fields annotated with @Builder.Default in a @Builder class
-    if (usesAnnotation(tree, Collections.singletonList(LOMBOK_BUILDER))) {
+    if (usesAnnotation(tree, Arrays.asList(LOMBOK_BUILDER, LOMBOK_SUPER_BUILDER))) {
       tree.members().stream()
         .filter(t -> t.is(Tree.Kind.VARIABLE))
         .map(VariableTree.class::cast)
@@ -270,7 +274,8 @@ public class LombokFilter extends BaseTreeVisitorIssueFilter {
     Symbol symbol = tree.symbol();
     if (symbol.isVariableSymbol() && symbol.type().is(LOMBOK_VAL)) {
       parentMethodInvocation(tree)
-        .ifPresent(mit -> excludeLines(mit, Arrays.asList(SillyEqualsCheck.class, CollectionInappropriateCallsCheck.class)));
+        .ifPresent(mit -> excludeLines(mit,
+          Arrays.asList(SillyEqualsCheck.class, CollectionInappropriateCallsCheck.class, AssertionTypesCheck.class)));
     }
     super.visitIdentifier(tree);
   }

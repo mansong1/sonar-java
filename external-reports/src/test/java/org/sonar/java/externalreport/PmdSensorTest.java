@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -28,7 +28,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.TextRange;
 import org.sonar.api.batch.fs.internal.DefaultTextPointer;
@@ -80,7 +79,7 @@ class PmdSensorTest {
     assertThat(repository.language()).isEqualTo("java");
     assertThat(repository.isExternal()).isTrue();
 
-    assertThat(repository.rules().size()).isEqualTo(288);
+    assertThat(repository.rules()).hasSize(288);
 
     RulesDefinition.Rule rule = repository.rule("EqualsNull");
     assertThat(rule).isNotNull();

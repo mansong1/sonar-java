@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -78,7 +78,7 @@ class UnitTestIndexTest {
     assertThat(report.getFailures()).isEqualTo(1);
     assertThat(report.getErrors()).isEqualTo(2);
     assertThat(report.getSkipped()).isZero();
-    assertThat(report.getResults().size()).isEqualTo(4);
+    assertThat(report.getResults()).hasSize(4);
     assertThat(report.getDurationMilliseconds()).isEqualTo(500L + 200L + 1000L + 350L);
   }
 
@@ -97,7 +97,7 @@ class UnitTestIndexTest {
     assertThat(report.getFailures()).isZero();
     assertThat(report.getErrors()).isEqualTo(1);
     assertThat(report.getSkipped()).isZero();
-    assertThat(report.getResults().size()).isEqualTo(2);
+    assertThat(report.getResults()).hasSize(2);
     assertThat(report.getDurationMilliseconds()).isEqualTo(500L + 200L);
   }
 

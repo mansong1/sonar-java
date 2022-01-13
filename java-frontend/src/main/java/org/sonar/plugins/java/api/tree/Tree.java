@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -704,6 +704,42 @@ public interface Tree {
      * {@link ArrayDimensionTree}
      */
     ARRAY_DIMENSION(ArrayDimensionTree.class),
+
+    /**
+     * {@link TypePatternTree}
+     *
+     * @since Java 17
+     * @deprecated Preview Feature
+     */
+    @Deprecated(since = "7.7", forRemoval = false)
+    TYPE_PATTERN(TypePatternTree.class),
+
+    /**
+     * {@link GuardedPatternTree}
+     *
+     * @since Java 17
+     * @deprecated Preview Feature
+     */
+    @Deprecated(since = "7.7", forRemoval = false)
+    GUARDED_PATTERN(GuardedPatternTree.class),
+
+    /**
+     * {@link NullPatternTree}
+     *
+     * @since Java 17
+     * @deprecated Preview Feature
+     */
+    @Deprecated(since = "7.7", forRemoval = false)
+    NULL_PATTERN(NullPatternTree.class),
+
+    /**
+     * {@link DefaultPatternTree}
+     *
+     * @since Java 17
+     * @deprecated Preview Feature
+     */
+    @Deprecated(since = "7.7", forRemoval = false)
+    DEFAULT_PATTERN(DefaultPatternTree.class),
 
     /**
      *An implementation-reserved node.

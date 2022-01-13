@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -22,6 +22,8 @@ package org.sonar.java.checks;
 import org.junit.jupiter.api.Test;
 import org.sonar.java.checks.verifier.CheckVerifier;
 
+import static org.sonar.java.checks.verifier.TestUtils.nonCompilingTestSourcesPath;
+
 class LeastSpecificTypeCheckTest {
 
   @Test
@@ -31,4 +33,13 @@ class LeastSpecificTypeCheckTest {
       .withCheck(new LeastSpecificTypeCheck())
       .verifyIssues();
   }
+
+  @Test
+  void test_non_compiling() {
+    CheckVerifier.newVerifier()
+      .onFile(nonCompilingTestSourcesPath("checks/LeastSpecificTypeCheck.java"))
+      .withCheck(new LeastSpecificTypeCheck())
+      .verifyNoIssues();
+  }
+
 }

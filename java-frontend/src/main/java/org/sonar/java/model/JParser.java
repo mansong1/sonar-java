@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -87,6 +87,10 @@ import org.sonar.java.model.expression.ParenthesizedTreeImpl;
 import org.sonar.java.model.expression.TypeArgumentListTreeImpl;
 import org.sonar.java.model.expression.TypeCastExpressionTreeImpl;
 import org.sonar.java.model.expression.VarTypeTreeImpl;
+import org.sonar.java.model.pattern.DefaultPatternTreeImpl;
+import org.sonar.java.model.pattern.GuardedPatternTreeImpl;
+import org.sonar.java.model.pattern.NullPatternTreeImpl;
+import org.sonar.java.model.pattern.TypePatternTreeImpl;
 import org.sonar.java.model.statement.AssertStatementTreeImpl;
 import org.sonar.java.model.statement.BlockTreeImpl;
 import org.sonar.java.model.statement.BreakStatementTreeImpl;
@@ -124,6 +128,7 @@ import org.sonar.plugins.java.api.tree.ModifierTree;
 import org.sonar.plugins.java.api.tree.ModuleDeclarationTree;
 import org.sonar.plugins.java.api.tree.ModuleDirectiveTree;
 import org.sonar.plugins.java.api.tree.PackageDeclarationTree;
+import org.sonar.plugins.java.api.tree.PatternTree;
 import org.sonar.plugins.java.api.tree.StatementTree;
 import org.sonar.plugins.java.api.tree.SyntaxToken;
 import org.sonar.plugins.java.api.tree.SyntaxTrivia;
@@ -171,9 +176,11 @@ public class JParser {
       throw new RecognitionException(line, message);
     }
 
-    Set<String> undefinedTypes = errors.stream()
+    Set<JProblem> undefinedTypes = errors.stream()
       .filter(IS_UNDEFINED_TYPE_ERROR)
-      .map(IProblem::getMessage)
+      .map(i -> new JProblem(
+        i.getMessage(),
+        (i.getID() & IProblem.PreviewFeatureUsed) != 0 ? JProblem.Type.PREVIEW_FEATURE_USED : JProblem.Type.UNDEFINED_TYPE))
       .collect(Collectors.toSet());
 
     JParser converter = new JParser();
@@ -640,8 +647,7 @@ public class JParser {
       .complete(modifiers, declarationKeyword, name)
       .completeTypeParameters(convertTypeParameters(e.typeParameters()));
 
-    if (e.getAST().isPreviewEnabled() && !e.permittedTypes().isEmpty()) {
-      // TODO final in Java 17? relates to sealed classes
+    if (!e.permittedTypes().isEmpty()) {
       List permittedTypes = e.permittedTypes();
       InternalSyntaxToken permitsKeyword = firstTokenBefore((Type) permittedTypes.get(0), TerminalTokens.TokenNameRestrictedIdentifierpermits);
       QualifiedIdentifierListTreeImpl classPermittedTypes = QualifiedIdentifierListTreeImpl.emptyList();
@@ -1377,6 +1383,7 @@ public class JParser {
     List<CaseGroupTreeImpl> groups = new ArrayList<>();
     List<CaseLabelTreeImpl> caselabels = null;
     StatementListTreeImpl body = null;
+
     for (Object o : list) {
       if (o instanceof SwitchCase) {
         if (caselabels == null) {
@@ -1387,7 +1394,7 @@ public class JParser {
         SwitchCase c = (SwitchCase) o;
         List<ExpressionTree> expressions = new ArrayList<>();
         for (Object oo : c.expressions()) {
-          expressions.add(convertExpression((Expression) oo));
+          expressions.add(convertExpressionFromCase((Expression) oo));
         }
 
         caselabels.add(new CaseLabelTreeImpl(
@@ -1407,6 +1414,38 @@ public class JParser {
       groups.add(new CaseGroupTreeImpl(caselabels, body));
     }
     return groups;
+  }
+
+  private ExpressionTree convertExpressionFromCase(Expression e) {
+    if (e.getNodeType() == ASTNode.CASE_DEFAULT_EXPRESSION) {
+      return new DefaultPatternTreeImpl(firstTokenIn(e, TerminalTokens.TokenNamedefault));
+    }
+    if (e.getNodeType() == ASTNode.NULL_LITERAL) {
+      return new NullPatternTreeImpl((LiteralTreeImpl) convertExpression(e));
+    }
+    if (e instanceof Pattern) {
+      return convertPattern((Pattern) e);
+    }
+    return convertExpression(e);
+  }
+
+  private PatternTree convertPattern(Pattern p) {
+    switch (p.getNodeType()) {
+      case ASTNode.TYPE_PATTERN:
+        return new TypePatternTreeImpl(convertVariable(((TypePattern) p).getPatternVariable()));
+      case ASTNode.GUARDED_PATTERN:
+        GuardedPattern g = (GuardedPattern) p;
+        return new GuardedPatternTreeImpl(
+          convertPattern(g.getPattern()),
+          firstTokenBefore(g.getExpression(), TerminalTokens.TokenNameAND_AND),
+          convertExpression(g.getExpression()));
+      case ASTNode.NULL_PATTERN:
+        // It is not clear how to reach this one, it seems to be possible only with badly constructed AST
+        // fall-through. Do nothing for now.
+      default:
+        // JEP-405 (not released as part of any JDK yet): ArrayPattern, RecordPattern
+        throw new IllegalStateException(ASTNode.nodeClassForType(p.getNodeType()).toString());
+    }
   }
 
   private SynchronizedStatementTreeImpl convertSynchronized(SynchronizedStatement e) {

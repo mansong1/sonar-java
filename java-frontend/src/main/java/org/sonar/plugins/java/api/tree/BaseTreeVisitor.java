@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -445,4 +445,24 @@ public class BaseTreeVisitor implements TreeVisitor {
     scan(tree.expression());
   }
 
+  @Override
+  public void visitTypePattern(TypePatternTree tree) {
+    scan(tree.patternVariable());
+  }
+
+  @Override
+  public void visitNullPattern(NullPatternTree tree) {
+    scan(tree.nullLiteral());
+  }
+
+  @Override
+  public void visitDefaultPattern(DefaultPatternTree tree) {
+    // do nothing, only contains a "default" token
+  }
+
+  @Override
+  public void visitGuardedPattern(GuardedPatternTree tree) {
+    scan(tree.pattern());
+    scan(tree.expression());
+  }
 }

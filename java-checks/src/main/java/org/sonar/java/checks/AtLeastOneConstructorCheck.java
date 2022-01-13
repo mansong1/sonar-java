@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -27,12 +27,15 @@ import org.sonar.java.model.ModifiersUtils;
 import org.sonar.plugins.java.api.IssuableSubscriptionVisitor;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
 import org.sonar.plugins.java.api.semantic.Symbol;
+import org.sonar.plugins.java.api.semantic.SymbolMetadata;
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.IdentifierTree;
 import org.sonar.plugins.java.api.tree.Modifier;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.Tree.Kind;
 import org.sonar.plugins.java.api.tree.VariableTree;
+
+import static org.sonar.java.checks.helpers.AnnotationsHelper.hasUnknownAnnotation;
 
 @Rule(key = "S1258")
 public class AtLeastOneConstructorCheck extends IssuableSubscriptionVisitor {
@@ -96,11 +99,13 @@ public class AtLeastOneConstructorCheck extends IssuableSubscriptionVisitor {
   }
 
   private static boolean isAutowired(Symbol symbol) {
-    return AUTOWIRED_ANNOTATIONS.stream().anyMatch(symbol.metadata()::isAnnotatedWith);
+    SymbolMetadata metadata = symbol.metadata();
+    return hasUnknownAnnotation(metadata) || AUTOWIRED_ANNOTATIONS.stream().anyMatch(metadata::isAnnotatedWith);
   }
 
   private static boolean isAnnotationExcluded(Symbol symbol) {
-    return EXCLUDED_ANNOTATIONS.stream().anyMatch(symbol.metadata()::isAnnotatedWith);
+    SymbolMetadata metadata = symbol.metadata();
+    return hasUnknownAnnotation(metadata) || EXCLUDED_ANNOTATIONS.stream().anyMatch(metadata::isAnnotatedWith);
   }
 
   private static boolean isBuilderPatternName(String name) {

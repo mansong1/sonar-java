@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -34,7 +34,10 @@ class RedundantTypeCastCheckTest {
       .withCheck(new RedundantTypeCastCheck())
       .withQuickFixes()
       .verifyIssues();
+  }
 
+  @Test
+  void test_non_compiling() {
     CheckVerifier.newVerifier()
       .onFile(nonCompilingTestSourcesPath("checks/RedundantTypeCastCheck.java"))
       .withCheck(new RedundantTypeCastCheck())

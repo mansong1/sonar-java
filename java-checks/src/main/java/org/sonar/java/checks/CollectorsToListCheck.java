@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -59,7 +59,7 @@ public class CollectorsToListCheck extends AbstractMethodDetection implements Ja
 
   private static final MethodMatchers LIST_MODIFICATION_METHODS = MethodMatchers.create()
     .ofSubTypes("java.util.List")
-    .names("add", "addAll", "remove", "removeAll", "retainAll", "replaceAll", "set", "sort", "clear")
+    .names("add", "addAll", "remove", "removeAll", "retainAll", "replaceAll", "set", "sort", "clear", "removeIf")
     .withAnyParameters()
     .build();
 

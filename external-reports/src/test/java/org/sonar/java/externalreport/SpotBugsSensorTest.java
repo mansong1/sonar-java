@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -72,7 +72,7 @@ class SpotBugsSensorTest {
     assertThat(repository.name()).isEqualTo("SpotBugs");
     assertThat(repository.language()).isEqualTo("java");
     assertThat(repository.isExternal()).isTrue();
-    assertThat(repository.rules().size()).isEqualTo(468);
+    assertThat(repository.rules()).hasSize(468);
 
     RulesDefinition.Rule rule = repository.rule("AM_CREATES_EMPTY_JAR_FILE_ENTRY");
     assertThat(rule).isNotNull();
@@ -88,7 +88,7 @@ class SpotBugsSensorTest {
     assertThat(findsecbugsRepo.language()).isEqualTo("java");
     assertThat(findsecbugsRepo.isExternal()).isTrue();
     repository = context.repository("external_findsecbugs");
-    assertThat(repository.rules().size()).isEqualTo(128);
+    assertThat(repository.rules()).hasSize(128);
   }
 
   @Test

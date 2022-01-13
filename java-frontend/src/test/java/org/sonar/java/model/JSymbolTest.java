@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -92,11 +92,26 @@ class JSymbolTest {
       .as("of method parameter")
       .hasOwner(cu.sema.methodSymbol(m.methodBinding));
 
+    assertThat(cu.sema.typeSymbol(p.variableBinding.getType()))
+      .as("of type int")
+      .hasOwner(Symbols.rootPackage)
+      .hasSameHashCodeAs(p.type().symbolType().symbol().hashCode());
+
     JType uType = cu.sema.type(u.variableBinding.getType());
     Symbol.TypeSymbol uTypeSymbol = uType.symbol();
     assertThat(uType.isUnknown()).isTrue();
     assertThat(uTypeSymbol.isUnknown()).isTrue();
     assertThat(uTypeSymbol.owner().isUnknown()).isTrue();
+  }
+
+  @Test
+  void primitive_type_hash_code() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class C { int u; int v; }");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    VariableTreeImpl uField = (VariableTreeImpl) c.members().get(0);
+    VariableTreeImpl vField = (VariableTreeImpl) c.members().get(1);
+    assertThat(cu.sema.typeSymbol(uField.variableBinding.getType()))
+      .hasSameHashCodeAs(cu.sema.typeSymbol(vField.variableBinding.getType()));
   }
 
   @Test
@@ -194,7 +209,6 @@ class JSymbolTest {
     assertThat(initializerBlock.declaration()).isNull();
     assertThat(initializerBlock.returnType()).isUnknown();
     assertThat(initializerBlock).isOfUnknownType();
-    assertThat(initializerBlock.overriddenSymbol()).isNull();
     assertThat(initializerBlock.overriddenSymbols()).isEmpty();
     assertThat(initializerBlock.usages()).isEmpty();
     assertThat(initializerBlock.parameterTypes()).isEmpty();

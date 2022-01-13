@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -30,6 +30,8 @@ import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonarsource.analyzer.commons.annotations.DeprecatedRuleKey;
+
+import static org.sonar.java.checks.helpers.AnnotationsHelper.hasUnknownAnnotation;
 
 @DeprecatedRuleKey(ruleKey = "S00107", repositoryKey = "squid")
 @Rule(key = "S107")
@@ -102,10 +104,6 @@ public class TooManyParametersCheck extends BaseTreeVisitor implements JavaFileS
   private static boolean usesAuthorizedAnnotation(MethodTree method) {
     SymbolMetadata metadata = method.symbol().metadata();
     return hasUnknownAnnotation(metadata) || WHITE_LIST.stream().anyMatch(metadata::isAnnotatedWith);
-  }
-
-  private static boolean hasUnknownAnnotation(SymbolMetadata symbolMetadata) {
-    return symbolMetadata.annotations().stream().anyMatch(annotation -> annotation.symbol().isUnknown());
   }
 
 }

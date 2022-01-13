@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -195,19 +195,6 @@ public interface Symbol {
      * @return empty list if no exception are declared in the throw clause of the method.
      */
     List<Type> thrownTypes();
-
-    /**
-     * Retrieve the overridden symbol. If no overrides are found, null is returned.
-     * Note that an "unknown" method symbol might be returned in case of ambiguities.
-     *
-     * @return the overridden symbol, null if the method is not overriding any method or overriding can not be determined (incomplete semantic)
-     *
-     * @deprecated since SonarJava 6.15, for removal. This method only returns the first symbol that has been overridden, rather than all symbols that are being overridden.
-     *             Use {@link #overriddenSymbols()} to get a list of all symbols
-     */
-    @Nullable
-    @Deprecated
-    Symbol.MethodSymbol overriddenSymbol();
 
     /**
      * Retrieve the overridden symbols in all the known type hierarchy.

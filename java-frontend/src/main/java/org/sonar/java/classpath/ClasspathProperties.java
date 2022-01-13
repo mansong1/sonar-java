@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -50,21 +50,25 @@ public class ClasspathProperties {
     );
     extensions.add(PropertyDefinition.builder(SONAR_JAVA_BINARIES)
       .description("Comma-separated paths to directories containing the binary files (directories with class files).")
+      .multiValues(true)
       .hidden()
       .build()
     );
     extensions.add(PropertyDefinition.builder(SONAR_JAVA_LIBRARIES)
       .description("Comma-separated paths to libraries required by the project.")
+      .multiValues(true)
       .hidden()
       .build()
     );
     extensions.add(PropertyDefinition.builder(SONAR_JAVA_TEST_BINARIES)
       .description("Comma-separated paths to directories containing the binary files (directories with class files).")
+      .multiValues(true)
       .hidden()
       .build()
     );
     extensions.add(PropertyDefinition.builder(SONAR_JAVA_TEST_LIBRARIES)
       .description("Comma-separated paths to libraries required by the project.")
+      .multiValues(true)
       .hidden()
       .build()
     );

@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import org.sonar.api.SonarProduct;
@@ -58,6 +59,7 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.java.annotations.VisibleForTesting;
 import org.sonar.java.classpath.ClasspathForMain;
 import org.sonar.java.classpath.ClasspathForTest;
+import org.sonar.java.model.JProblem;
 import org.sonar.java.model.LineUtils;
 import org.sonar.java.reporting.AnalyzerMessage;
 import org.sonar.java.reporting.JavaIssue;
@@ -76,6 +78,7 @@ public class SonarComponents {
 
   public static final String FAIL_ON_EXCEPTION_KEY = "sonar.internal.analysis.failFast";
   public static final String SONAR_BATCH_MODE_KEY = "sonar.java.internal.batchMode";
+  public static final String SONAR_BATCH_SIZE_KEY = "sonar.java.experimental.batchModeSizeInKB";
 
   private static final Version SONARLINT_6_3 = Version.parse("6.3");
 
@@ -83,7 +86,7 @@ public class SonarComponents {
 
   private final ClasspathForMain javaClasspath;
   private final ClasspathForTest javaTestClasspath;
-  private final Set<String> undefinedTypes = new HashSet<>();
+  private final Set<JProblem> undefinedTypes = new HashSet<>();
 
   private final CheckFactory checkFactory;
   @Nullable
@@ -338,7 +341,21 @@ public class SonarComponents {
   }
 
   public boolean isBatchModeEnabled() {
-    return context.config().getBoolean(SONAR_BATCH_MODE_KEY).orElse(false);
+    return context.config().getBoolean(SONAR_BATCH_MODE_KEY).orElse(false) ||
+      context.config().hasKey(SONAR_BATCH_SIZE_KEY);
+  }
+
+  public boolean isAutoScan() {
+    return context.config().getBoolean(SONAR_BATCH_MODE_KEY).orElse(false) &&
+      !context.config().hasKey(SONAR_BATCH_SIZE_KEY);
+  }
+
+  /**
+   * Returns the batch mode size as read from configuration. If not value can be found, returns -1L.
+   * @return the batch mode size or a default value of -1L.
+   */
+  public long getBatchModeSizeInKB() {
+    return context.config().getLong(SONAR_BATCH_SIZE_KEY).orElse(-1L);
   }
 
   public File workDir() {
@@ -356,7 +373,7 @@ public class SonarComponents {
     return context.project();
   }
 
-  public void collectUndefinedTypes(Set<String> undefinedTypes) {
+  public void collectUndefinedTypes(Set<JProblem> undefinedTypes) {
     this.undefinedTypes.addAll(undefinedTypes);
   }
 
@@ -372,19 +389,44 @@ public class SonarComponents {
   }
 
   private void logUndefinedTypes(int maxLines) {
-    boolean moreThanMax = undefinedTypes.size() > maxLines;
+    logParserMessages(
+      undefinedTypes.stream()
+        .filter(m -> m.type() == JProblem.Type.UNDEFINED_TYPE),
+      maxLines,
+      "Unresolved imports/types have been detected during analysis. Enable DEBUG mode to see them.",
+      "Unresolved imports/types:"
+    );
+    logParserMessages(
+      undefinedTypes.stream()
+        .filter(m -> m.type() == JProblem.Type.PREVIEW_FEATURE_USED),
+      maxLines,
+      "Use of preview features have been detected during analysis. Enable DEBUG mode to see them.",
+      "Use of preview features:"
+    );
+  }
 
-    String warningMessage = "Unresolved imports/types have been detected during analysis. Enable DEBUG mode to see them.";
-    String debugMessage = moreThanMax ? String.format("First %d unresolved imports/types:", maxLines) : "Unresolved imports/types:";
+  private static void logParserMessages(Stream<JProblem> messages, int maxLines, String warningMessage, String debugMessage) {
+    final List<String> messagesList = messages
+      .map(Object::toString)
+      .sorted()
+      .collect(Collectors.toList());
+    int messagesListSize = messagesList.size();
+    if (messagesListSize == 0) {
+      return;
+    }
+    final boolean moreThanMax = messagesListSize > maxLines;
 
-    String delimiter = System.lineSeparator() + "- ";
-    String prefix = debugMessage + delimiter;
-    String suffix = moreThanMax ? (delimiter + "...") : "";
+    if (moreThanMax) {
+      debugMessage += " (Limited to " + maxLines + ")";
+    }
+
+    final String delimiter = System.lineSeparator() + "- ";
+    final String prefix = debugMessage + delimiter;
+    final String suffix = moreThanMax ? (delimiter + "...") : "";
 
     LOG.warn(warningMessage);
-    LOG.debug(undefinedTypes
+    LOG.debug(messagesList
       .stream()
-      .sorted()
       .limit(maxLines)
       .collect(Collectors.joining(delimiter, prefix, suffix)));
   }

@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -108,8 +108,8 @@ class ClassesLayoutTest {
   @Test
   void symbol_method() {
     assertAll(
-      () -> assertThat(instanceSize(JMethodSymbol.class, X86_64)).isEqualTo(112),
-      () -> assertThat(instanceSize(JMethodSymbol.class, X86_64_COOPS)).isEqualTo(64)
+      () -> assertThat(instanceSize(JMethodSymbol.class, X86_64)).isEqualTo(104),
+      () -> assertThat(instanceSize(JMethodSymbol.class, X86_64_COOPS)).isEqualTo(56)
     );
   }
 

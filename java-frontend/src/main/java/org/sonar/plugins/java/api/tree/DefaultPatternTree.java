@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -17,19 +17,22 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonar.java.checks;
+package org.sonar.plugins.java.api.tree;
 
-import org.junit.jupiter.api.Test;
-import org.sonar.java.checks.verifier.CheckVerifier;
+/**
+ * Default pattern tree, introduced with Java 17 and JEP-406.
+ *
+ * <pre>
+ *   case {@link #defaultToken()} : ...
+ *   case {@link #defaultToken()} -> ...
+ * </pre>
+ *
+ * @since Java 17
+ * @deprecated Preview Feature
+ */
+@Deprecated(since = "7.7", forRemoval = false)
+public interface DefaultPatternTree extends PatternTree {
 
-class IndexOfStartPositionCheckTest {
-
-  @Test
-  void test() {
-    CheckVerifier.newVerifier()
-      .onFile("src/test/files/checks/IndexOfStartPositionCheck.java")
-      .withCheck(new IndexOfStartPositionCheck())
-      .verifyIssues();
-  }
+  SyntaxToken defaultToken();
 
 }

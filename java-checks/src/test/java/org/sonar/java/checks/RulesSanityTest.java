@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -102,7 +102,7 @@ class RulesSanityTest {
 
     File moduleBaseDir = new File(".").getCanonicalFile().getParentFile();
     List<InputFile> inputFiles = getJavaInputFiles(moduleBaseDir);
-    assertThat(inputFiles.size()).isGreaterThanOrEqualTo(checks.size());
+    assertThat(inputFiles).hasSizeGreaterThanOrEqualTo(checks.size());
 
     List<File> classpath = getClassPath();
     assertThat(classpath).isNotEmpty();

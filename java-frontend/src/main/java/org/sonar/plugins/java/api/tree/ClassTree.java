@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -87,18 +87,14 @@ public interface ClassTree extends StatementTree {
   ListTree<TypeTree> superInterfaces();
 
   /**
-   * @since Java 15
-   * @deprecated Preview Feature
+   * @since Java 15 (preview), Java 17 (final)
    */
-  @Deprecated
   @Nullable
   SyntaxToken permitsKeyword();
 
   /**
-   * @since Java 15
-   * @deprecated Preview Feature
+   * @since Java 15 (preview), Java 17 (final)
    */
-  @Deprecated
   ListTree<TypeTree> permittedTypes();
 
   SyntaxToken openBraceToken();

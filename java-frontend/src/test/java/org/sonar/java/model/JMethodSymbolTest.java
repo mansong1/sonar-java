@@ -1,6 +1,6 @@
 /*
  * SonarQube Java
- * Copyright (C) 2012-2021 SonarSource SA
+ * Copyright (C) 2012-2022 SonarSource SA
  * mailto:info AT sonarsource DOT com
  *
  * This program is free software; you can redistribute it and/or
@@ -144,26 +144,6 @@ class JMethodSymbolTest {
     JMethodSymbol symbol = cu.sema.methodSymbol(Objects.requireNonNull(m.methodBinding));
 
     assertThat(symbol.overriddenSymbols()).containsOnly(retrieveMethodSymbol("A", "a", cu));
-  }
-
-  @Test
-  void testOverridenSymbolVSOverridenSymbols() {
-    JavaTree.CompilationUnitTreeImpl cu = test(""
-      + "interface A { void a(); }\n"
-      + "interface B { void a(); }\n"
-      + "class Clazz implements A, B { public void a() {} }");
-    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(2);
-    MethodTreeImpl m = (MethodTreeImpl) c.members().get(0);
-    JMethodSymbol symbol = cu.sema.methodSymbol(Objects.requireNonNull(m.methodBinding));
-
-    JMethodSymbol aA = retrieveMethodSymbol("A", "a", cu);
-    JMethodSymbol aB = retrieveMethodSymbol("B", "a", cu);
-
-    assertThat(symbol.overriddenSymbol()).isEqualTo(aA);
-    // call it again to not recompute overridden symbols
-    assertThat(symbol.overriddenSymbol()).isEqualTo(aA);
-
-    assertThat(symbol.overriddenSymbols()).containsExactly(aA, aB);
   }
 
   @Test
