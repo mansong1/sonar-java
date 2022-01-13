@@ -54,13 +54,7 @@ pipeline:
                                         limits:
                                             memory: 8Gi
                                             cpu: "4.0"
-                                failureStrategies:
-                                    - onFailure:
-                                          errors:
-                                              - Unknown
-                                              - Timeout
-                                          action:
-                                              type: Ignore
+                                failureStrategies: []
                           - step:
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
