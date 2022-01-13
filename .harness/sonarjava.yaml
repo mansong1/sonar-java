@@ -74,7 +74,7 @@ pipeline:
                                 spec:
                                     connectorRef: org.Dockerhub
                                     image: bash
-                                    command: ls -lrt
+                                    command: ls -lart
                           - step:
                                 type: SaveCacheS3
                                 name: Save Maven Cache
