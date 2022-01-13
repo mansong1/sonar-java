@@ -43,8 +43,7 @@ pipeline:
                                     image: <+build.variables.MAVEN_IMAGE>
                                     language: Java
                                     buildTool: Maven
-                                    args: sonar:sonar
-                                    packages: com.sonar.
+                                    args: clean install
                                     runOnlySelectedTests: true
                                     reports:
                                         type: JUnit
