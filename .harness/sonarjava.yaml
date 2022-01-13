@@ -50,8 +50,6 @@ pipeline:
                                         spec:
                                             paths:
                                                 - "**/*.xml"
-                                    envVariables:
-                                        MAVEN_OPTS: '"-Xmx1536m -Xms128m"'
                                     resources:
                                         limits:
                                             memory: 2Gi
