@@ -68,6 +68,14 @@ pipeline:
                                     templateRef: check_licence_compliance
                                     versionLabel: v1.0.0
                           - step:
+                                type: Run
+                                name: debug
+                                identifier: debug
+                                spec:
+                                    connectorRef: org.Dockerhub
+                                    image: bash
+                                    command: ls -lrt
+                          - step:
                                 type: SaveCacheS3
                                 name: Save Maven Cache
                                 identifier: Save_Maven_Cache
