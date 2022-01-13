@@ -52,8 +52,8 @@ pipeline:
                                                 - "**/*.xml"
                                     resources:
                                         limits:
-                                            memory: 2Gi
-                                            cpu: "2.0"
+                                            memory: 8Gi
+                                            cpu: "4.0"
                           - step:
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
