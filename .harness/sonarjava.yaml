@@ -68,12 +68,6 @@ pipeline:
                                     templateRef: check_licence_compliance
                                     versionLabel: v1.0.0
                           - step:
-                                name: CleanUp
-                                identifier: CleanUp
-                                template:
-                                    templateRef: cleanup_maven_repository
-                                    versionLabel: v1.0.0
-                          - step:
                                 type: SaveCacheS3
                                 name: Save Maven Cache
                                 identifier: Save_Maven_Cache
