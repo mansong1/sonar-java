@@ -56,18 +56,6 @@ pipeline:
                                             memory: 2Gi
                                             cpu: "2.0"
                           - step:
-                                type: Run
-                                name: Build
-                                identifier: Build
-                                spec:
-                                    connectorRef: org.Dockerhub
-                                    image: <+build.variables.MAVEN_IMAGE>
-                                    command: mvn -Dmaven.test.skip=true
-                                    resources:
-                                        limits:
-                                            memory: 2Gi
-                                            cpu: "2.0"
-                          - step:
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
                                 template:
