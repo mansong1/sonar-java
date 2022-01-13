@@ -1,0 +1,77 @@
+template:
+    name: build
+    identifier: build
+    versionLabel: v1.0.0
+    type: Stage
+    projectIdentifier: Sonar
+    orgIdentifier: default
+    spec:
+        type: CI
+        spec:
+            cloneCodebase: true
+            infrastructure:
+                type: KubernetesDirect
+                spec:
+                    connectorRef: org.GKE
+                    namespace: harness-builds
+            execution:
+                steps:
+                    - step:
+                          type: RestoreCacheS3
+                          name: Restore Maven Cache
+                          identifier: Restore_Maven_Cache
+                          spec:
+                              connectorRef: org.AWS
+                              region: eu-west-2
+                              bucket: mansong-maven
+                              key: sonar
+                              archiveFormat: Gzip
+                    - step:
+                          type: RunTests
+                          name: Run Tests
+                          identifier: Run_TI
+                          spec:
+                              connectorRef: org.Dockerhub
+                              image: <+build.variables.MAVEN_IMAGE>
+                              language: Java
+                              buildTool: Maven
+                              args: clean install
+                              runOnlySelectedTests: true
+                              reports:
+                                  type: JUnit
+                                  spec:
+                                      paths:
+                                          - "**/*.xml"
+                              resources:
+                                  limits:
+                                      memory: 8Gi
+                                      cpu: "4.0"
+                    - step:
+                          name: Check Licence Compliance
+                          identifier: Check_Licence_Compliance
+                          template:
+                              templateRef: check_licence_compliance
+                              versionLabel: v1.0.0
+                    - step:
+                          name: CleanUp
+                          identifier: CleanUp
+                          template:
+                              templateRef: cleanup_maven_repository
+                              versionLabel: v1.0.0
+                    - step:
+                          type: SaveCacheS3
+                          name: Save Maven Cache
+                          identifier: Save_Maven_Cache
+                          spec:
+                              connectorRef: org.AWS
+                              region: eu-west-1
+                              bucket: mansong-maven
+                              key: sonar
+                              sourcePaths:
+                                  - /harness/.m2/repository
+                              archiveFormat: Gzip
+                              override: true
+        variables:
+            - name: MAVEN_IMAGE
+              type: String
+              value: maven:3.8.3-openjdk-16
