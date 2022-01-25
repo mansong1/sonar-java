@@ -53,7 +53,7 @@ pipeline:
                                     resources:
                                         limits:
                                             memory: 4Gi
-                                            cpu: "1.0"
+                                            cpu: "2.0"
                                 failureStrategies: []
                           - step:
                                 name: Check Licence Compliance
