@@ -1,94 +1,92 @@
 pipeline:
-    name: sonar-java
-    identifier: sonarjava
-    projectIdentifier: Sonar
-    orgIdentifier: default
-    tags: {}
-    properties:
-        ci:
-            codebase:
-                connectorRef: org.Github
-                repoName: sonar-java
-                build: <+input>
     stages:
         - stage:
-              name: build
-              identifier: build
+              variables:
+                  - value: maven:3.8.4-openjdk
+                    type: String
+                    name: MAVEN_IMAGE
               type: CI
               spec:
-                  cloneCodebase: true
                   infrastructure:
                       type: KubernetesDirect
                       spec:
-                          connectorRef: org.GKE
                           namespace: harness-builds
+                          connectorRef: org.GKE
                   execution:
                       steps:
                           - step:
                                 type: RestoreCacheS3
+                                spec:
+                                    region: eu-west-2
+                                    key: sonar
+                                    connectorRef: org.AWS
+                                    bucket: mansong-maven
+                                    archiveFormat: Gzip
                                 name: Restore Maven Cache
                                 identifier: Restore_Maven_Cache
-                                spec:
-                                    connectorRef: org.AWS
-                                    region: eu-west-2
-                                    bucket: mansong-maven
-                                    key: sonar
-                                    archiveFormat: Gzip
                           - step:
                                 type: RunTests
-                                name: Run Tests
-                                identifier: Run_TI
                                 spec:
-                                    connectorRef: org.Dockerhub
-                                    image: <+build.variables.MAVEN_IMAGE>
-                                    language: Java
-                                    buildTool: Maven
-                                    args: clean install
                                     runOnlySelectedTests: true
+                                    resources:
+                                        limits:
+                                            memory: 4Gi
+                                            cpu: "2.0"
                                     reports:
                                         type: JUnit
                                         spec:
                                             paths:
                                                 - "**/*.xml"
-                                    resources:
-                                        limits:
-                                            memory: 4Gi
-                                            cpu: "2.0"
-                                failureStrategies: []
+                                    language: Java
+                                    image: <+build.variables.MAVEN_IMAGE>
+                                    connectorRef: org.Dockerhub
+                                    buildTool: Maven
+                                    args: clean install
+                                name: Run Tests
+                                identifier: Run_TI
                           - step:
+                                template:
+                                    versionLabel: v1.0.0
+                                    templateRef: check_licence_compliance
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
-                                template:
-                                    templateRef: check_licence_compliance
-                                    versionLabel: v1.0.0
                           - step:
+                                template:
+                                    versionLabel: v1.0.0
+                                    templateRef: cleanup_maven_repository
                                 name: Clean Up Maven Repo
                                 identifier: Clean_Up_Maven_Repo
-                                template:
-                                    templateRef: cleanup_maven_repository
-                                    versionLabel: v1.0.0
                           - step:
                                 type: Run
+                                spec:
+                                    image: bash:latest
+                                    connectorRef: org.Dockerhub
+                                    command: ls -larth
                                 name: echo
                                 identifier: echo
-                                spec:
-                                    connectorRef: org.Dockerhub
-                                    image: bash:latest
-                                    command: ls -larth
                           - step:
                                 type: SaveCacheS3
-                                name: Save Maven Cache
-                                identifier: Save_Maven_Cache
                                 spec:
-                                    connectorRef: org.AWS
-                                    region: eu-west-1
-                                    bucket: mansong-maven
-                                    key: sonar
                                     sourcePaths:
                                         - /harness/.m2/repository
-                                    archiveFormat: Gzip
+                                    region: eu-west-1
                                     override: true
-              variables:
-                  - name: MAVEN_IMAGE
-                    type: String
-                    value: maven:3.8.4-openjdk
+                                    key: sonar
+                                    connectorRef: org.AWS
+                                    bucket: mansong-maven
+                                    archiveFormat: Gzip
+                                name: Save Maven Cache
+                                identifier: Save_Maven_Cache
+                  cloneCodebase: true
+              name: build
+              identifier: build
+    properties:
+        ci:
+            codebase:
+                repoName: sonar-java
+                connectorRef: org.Github
+                build: <+input>
+    projectIdentifier: Sonar
+    orgIdentifier: default
+    name: sonar-java
+    identifier: sonarjava
