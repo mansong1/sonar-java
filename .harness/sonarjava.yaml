@@ -2,16 +2,16 @@ pipeline:
     stages:
         - stage:
               variables:
-                  - value: maven:3.8.4-openjdk
+                  - name: MAVEN_IMAGE
                     type: String
-                    name: MAVEN_IMAGE
+                    value: maven:3.8.4-openjdk-17
               type: CI
               spec:
                   infrastructure:
                       type: KubernetesDirect
                       spec:
-                          namespace: harness-builds
                           connectorRef: org.GKE
+                          namespace: harness-builds
                   execution:
                       steps:
                           - step:
