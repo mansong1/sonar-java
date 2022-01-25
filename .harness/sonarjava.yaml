@@ -68,6 +68,14 @@ pipeline:
                                     templateRef: cleanup_maven_repository
                                     versionLabel: v1.0.0
                           - step:
+                                type: Run
+                                name: echo
+                                identifier: echo
+                                spec:
+                                    connectorRef: org.Dockerhub
+                                    image: bash:latest
+                                    command: ls -larth
+                          - step:
                                 type: SaveCacheS3
                                 name: Save Maven Cache
                                 identifier: Save_Maven_Cache
