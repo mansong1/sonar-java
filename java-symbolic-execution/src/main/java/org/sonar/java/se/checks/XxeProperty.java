@@ -225,4 +225,31 @@ public interface XxeProperty {
       return PROPERTIES;
     }
   }
+
+  enum FeatureSecureProcessing implements Constraint, XxeProperty {
+    UNSECURED, SECURED, NAMED;
+
+    private static final XxePropertyHolder PROPERTIES = new XxePropertyHolder(
+      "http://javax.xml.XMLConstants/feature/secure-processing", NAMED,
+      XxeProperty::isSetToFalse, UNSECURED,
+      XxeProperty::isSetToTrue, SECURED);
+    @Override
+    public XxePropertyHolder properties() {
+      return PROPERTIES;
+    }
+  }
+
+  enum FeatureXInclude implements Constraint, XxeProperty {
+    ENABLE, DISABLE, NAMED;
+
+    private static final XxePropertyHolder PROPERTIES = new XxePropertyHolder(
+      "http://apache.org/xml/features/xinclude", NAMED,
+      XxeProperty::isSetToFalse, DISABLE,
+      XxeProperty::isSetToTrue, ENABLE);
+
+    @Override
+    public XxePropertyHolder properties() {
+      return PROPERTIES;
+    }
+  }
 }

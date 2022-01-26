@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.sonar.check.Rule;
-import org.sonarsource.analyzer.commons.collections.MapBuilder;
 import org.sonar.java.model.ExpressionUtils;
 import org.sonar.java.se.CheckerContext;
 import org.sonar.java.se.FlowComputation;
@@ -42,7 +41,10 @@ import org.sonar.java.se.checks.XxeProperty.FeatureDisallowDoctypeDecl;
 import org.sonar.java.se.checks.XxeProperty.FeatureExternalGeneralEntities;
 import org.sonar.java.se.checks.XxeProperty.FeatureIsSupportingExternalEntities;
 import org.sonar.java.se.checks.XxeProperty.FeatureLoadExternalDtd;
+import org.sonar.java.se.checks.XxeProperty.FeatureSecureProcessing;
 import org.sonar.java.se.checks.XxeProperty.FeatureSupportDtd;
+import org.sonar.java.se.checks.XxeProperty.FeatureXInclude;
+import org.sonar.java.se.constraint.BooleanConstraint;
 import org.sonar.java.se.constraint.Constraint;
 import org.sonar.java.se.constraint.ConstraintManager;
 import org.sonar.java.se.constraint.ConstraintsByDomain;
@@ -57,6 +59,7 @@ import org.sonar.plugins.java.api.tree.MethodInvocationTree;
 import org.sonar.plugins.java.api.tree.NewClassTree;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.VariableTree;
+import org.sonarsource.analyzer.commons.collections.MapBuilder;
 
 @Rule(key = "S2755")
 public class XxeProcessingCheck extends SECheck {
@@ -90,6 +93,22 @@ public class XxeProcessingCheck extends SECheck {
     .ofTypes(SAX_PARSER_FACTORY)
     .names(NEW_INSTANCE)
     .withAnyParameters()
+    .build();
+
+  private static final MethodMatchers SET_X_INCLUDE_AWARE = MethodMatchers.create()
+    .ofSubTypes(
+      DOCUMENT_BUILDER_FACTORY,
+      SAX_PARSER_FACTORY)
+    .names("setXIncludeAware")
+    .addParametersMatcher(BOOLEAN)
+    .build();
+
+  private static final MethodMatchers SET_VALIDATING = MethodMatchers.create()
+    .ofSubTypes(
+      DOCUMENT_BUILDER_FACTORY,
+      SAX_PARSER_FACTORY)
+    .names("setValidating")
+    .addParametersMatcher(BOOLEAN)
     .build();
 
   // SchemaFactory and Validator
@@ -133,7 +152,7 @@ public class XxeProcessingCheck extends SECheck {
     .withAnyParameters()
     .build();
 
-  private static final MethodMatchers NEW_DOCUMENT_BUILDER = MethodMatchers.create()
+  protected static final MethodMatchers NEW_DOCUMENT_BUILDER = MethodMatchers.create()
     .ofSubTypes(DOCUMENT_BUILDER_FACTORY)
     .names("newDocumentBuilder")
     .addWithoutParametersMatcher()
@@ -147,7 +166,6 @@ public class XxeProcessingCheck extends SECheck {
           || c.hasConstraint(FeatureIsSupportingExternalEntities.SECURED)
           || c.hasConstraint(XxeEntityResolver.CUSTOM_ENTITY_RESOLVER))
       .put(DOCUMENT_BUILDER_FACTORY_NEW_INSTANCE, XxeProcessingCheck::documentBuilderFactoryIsSecured)
-      .put(NEW_DOCUMENT_BUILDER, c -> c.hasConstraint(XxeEntityResolver.CUSTOM_ENTITY_RESOLVER))
       .put(SAX_PARSER_FACTORY_NEW_INSTANCE,
         c -> (c.hasConstraint(AttributeDTD.SECURED) && c.hasConstraint(AttributeSchema.SECURED))
           || c.hasConstraint(FeatureDisallowDoctypeDecl.SECURED)
@@ -168,7 +186,8 @@ public class XxeProcessingCheck extends SECheck {
       || (c.hasConstraint(AttributeDTD.SECURED) && c.hasConstraint(AttributeSchema.SECURED))
       || c.hasConstraint(FeatureDisallowDoctypeDecl.SECURED)
       || c.hasConstraint(FeatureLoadExternalDtd.SECURED)
-      || c.hasConstraint(FeatureExternalGeneralEntities.SECURED);
+      || c.hasConstraint(FeatureExternalGeneralEntities.SECURED)
+      || c.hasConstraint(XxeEntityResolver.CUSTOM_ENTITY_RESOLVER);
   }
 
   private static final Map<MethodMatchers, Predicate<ConstraintsByDomain>> CONDITIONS_FOR_SECURED_BY_TYPE_NEW_CLASS =
@@ -188,7 +207,7 @@ public class XxeProcessingCheck extends SECheck {
       .names("setAttribute").addParametersMatcher(JAVA_LANG_STRING, JAVA_LANG_OBJECT).build(),
     MethodMatchers.create().ofSubTypes(XML_INPUT_FACTORY, SAX_PARSER, SCHEMA_FACTORY, VALIDATOR, XML_READER, SAX_BUILDER)
       .names("setProperty").addParametersMatcher(JAVA_LANG_STRING, JAVA_LANG_OBJECT).build(),
-    MethodMatchers.create().ofSubTypes(DOCUMENT_BUILDER_FACTORY, SAX_PARSER_FACTORY, XML_READER, SAX_BUILDER, SAX_READER)
+    MethodMatchers.create().ofSubTypes(DOCUMENT_BUILDER_FACTORY, SAX_PARSER_FACTORY, TRANSFORMER_FACTORY, SCHEMA_FACTORY, XML_READER, SAX_BUILDER, SAX_READER)
       .names("setFeature").addParametersMatcher(JAVA_LANG_STRING, BOOLEAN).build());
 
   private static final String DOCUMENT_BUILDER = "javax.xml.parsers.DocumentBuilder";
@@ -204,10 +223,11 @@ public class XxeProcessingCheck extends SECheck {
     MethodMatchers.create().ofTypes(SAX_PARSER_FACTORY).names("newSAXParser").withAnyParameters().build(),
     MethodMatchers.create().ofTypes(SCHEMA_FACTORY).names("newSchema").withAnyParameters().build(),
     MethodMatchers.create().ofTypes("javax.xml.validation.Schema").names("newValidator").withAnyParameters().build(),
-    MethodMatchers.create().ofTypes(SAX_PARSER).names("getXMLReader").withAnyParameters().build()
+    MethodMatchers.create().ofTypes(SAX_PARSER).names("getXMLReader").withAnyParameters().build(),
+    NEW_DOCUMENT_BUILDER
   );
 
-  private static final MethodMatchers PARSING_METHODS = MethodMatchers.or(
+  protected static final MethodMatchers PARSING_METHODS = MethodMatchers.or(
     MethodMatchers.create().ofSubTypes(SAX_PARSER, XML_READER, DOCUMENT_BUILDER).names("parse").withAnyParameters().build(),
     MethodMatchers.create().ofSubTypes(TRANSFORMER_FACTORY).names("newTransformer").withAnyParameters().build(),
     MethodMatchers.create().ofSubTypes(XML_INPUT_FACTORY).name(n -> n.startsWith("create")).withAnyParameters().build(),
@@ -222,6 +242,8 @@ public class XxeProcessingCheck extends SECheck {
     FeatureDisallowDoctypeDecl.values(),
     FeatureExternalGeneralEntities.values(),
     FeatureLoadExternalDtd.values(),
+    FeatureSecureProcessing.values(),
+    FeatureXInclude.values(),
     AttributeDTD.values(),
     AttributeSchema.values(),
     AttributeStyleSheet.values())
@@ -268,20 +290,12 @@ public class XxeProcessingCheck extends SECheck {
       programState = addNamedConstraint(tree.initializer(), programState);
     }
 
-    private boolean isSecuredDocumentBuilderCreation(MethodInvocationTree mit) {
-      ConstraintsByDomain c = programState.getConstraints(programState.peekValue(mit.arguments().size()));
-      return documentBuilderFactoryIsSecured(c);
-    }
-
     @Override
     public void visitMethodInvocation(MethodInvocationTree mit) {
       // Test initialisation of XML processing API
       for (Map.Entry<MethodMatchers, Predicate<ConstraintsByDomain>> entry : CONDITIONS_FOR_SECURED_BY_TYPE.entrySet()) {
         if (entry.getKey().matches(mit)) {
-          if (!(entry.getKey() == NEW_DOCUMENT_BUILDER && isSecuredDocumentBuilderCreation(mit))) {
-            constraintManager
-              .setValueFactory(() -> new XxeSymbolicValue(ExpressionUtils.methodName(mit), entry.getValue()));
-          }
+          constraintManager.setValueFactory(() -> new XxeSymbolicValue(ExpressionUtils.methodName(mit), entry.getValue()));
           break;
         }
       }
@@ -297,6 +311,10 @@ public class XxeProcessingCheck extends SECheck {
         }
       } else if (ENTITY_RESOLVER_SETTERS.matches(mit)) {
         handleEntityResolver(mit);
+      } else if (SET_X_INCLUDE_AWARE.matches(mit)) {
+        handleBooleanConstraintFromFirstArgument(mit, XmlSetXIncludeAware.ENABLE, XmlSetXIncludeAware.class);
+      } else if (SET_VALIDATING.matches(mit)) {
+        handleBooleanConstraintFromFirstArgument(mit, XmlSetValidating.ENABLE, XmlSetValidating.class);
       }
 
       // Test if API is used without any protection against XXE.
@@ -307,6 +325,16 @@ public class XxeProcessingCheck extends SECheck {
           XxeSymbolicValue xxeSymbolicValue = (XxeSymbolicValue) peek;
           reportIfNotSecured(context, xxeSymbolicValue, programState.getConstraints(xxeSymbolicValue));
         }
+      }
+    }
+
+    private void handleBooleanConstraintFromFirstArgument(MethodInvocationTree mit, Constraint constraint, Class<? extends Constraint> domain) {
+      SymbolicValue mitResultSV = programState.peekValue(mit.arguments().size());
+      SymbolicValue enableSV = programState.peekValue(0);
+      if (programState.getConstraint(enableSV, BooleanConstraint.class) == BooleanConstraint.TRUE) {
+        programState = programState.addConstraint(mitResultSV, constraint);
+      } else {
+        programState = programState.removeConstraintsOnDomain(mitResultSV, domain);
       }
     }
 
@@ -439,14 +467,22 @@ public class XxeProcessingCheck extends SECheck {
     SENSITIVE
   }
 
-  private enum XxeEntityResolver implements Constraint {
+  protected enum XxeEntityResolver implements Constraint {
     CUSTOM_ENTITY_RESOLVER
   }
 
-  private static class XxeSymbolicValue extends SymbolicValue {
-    private final Tree init;
+  protected enum XmlSetValidating implements Constraint {
+    ENABLE
+  }
+
+  protected enum XmlSetXIncludeAware implements Constraint {
+    ENABLE
+  }
+
+  protected static class XxeSymbolicValue extends SymbolicValue {
+    protected final Tree init;
     private final Predicate<ConstraintsByDomain> conditionForSecured;
-    private boolean isField;
+    protected boolean isField;
 
     private XxeSymbolicValue(Tree init, Predicate<ConstraintsByDomain> conditionForSecured) {
       this.init = init;

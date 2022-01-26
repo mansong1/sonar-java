@@ -32,9 +32,11 @@ import org.junit.jupiter.api.Test;
 import org.sonar.java.cfg.CFG;
 import org.sonar.java.checks.verifier.TestUtils;
 import org.sonar.java.model.JUtils;
+import org.sonar.java.se.checks.AllowXMLInclusionCheck;
 import org.sonar.java.se.checks.BooleanGratuitousExpressionsCheck;
 import org.sonar.java.se.checks.ConditionalUnreachableCodeCheck;
 import org.sonar.java.se.checks.CustomUnclosedResourcesCheck;
+import org.sonar.java.se.checks.DenialOfServiceXMLCheck;
 import org.sonar.java.se.checks.DivisionByZeroCheck;
 import org.sonar.java.se.checks.InvariantReturnCheck;
 import org.sonar.java.se.checks.LocksNotUnlockedCheck;
@@ -49,6 +51,7 @@ import org.sonar.java.se.checks.RedundantAssignmentsCheck;
 import org.sonar.java.se.checks.SECheck;
 import org.sonar.java.se.checks.StreamNotConsumedCheck;
 import org.sonar.java.se.checks.UnclosedResourcesCheck;
+import org.sonar.java.se.checks.XmlParserLoadsExternalSchemasCheck;
 import org.sonar.java.se.checks.XxeProcessingCheck;
 import org.sonar.java.se.constraint.ObjectConstraint;
 import org.sonar.java.se.symbolicvalues.SymbolicValue;
@@ -158,6 +161,20 @@ class ExplodedGraphWalkerTest {
       .withClassPath(SETestUtils.CLASS_PATH)
       .withJavaVersion(14)
       .verifyIssues();
+  }
+
+  /**
+   * Checking that Java 17 patterns do not fail SE engine
+   * TODO once feature is final: make sure learned constraints propagate in branches
+   */
+  @Test
+  void switchWithPatterns() {
+    SECheckVerifier.newVerifier()
+      .onFile(TestUtils.nonCompilingTestSourcesPath("symbolicexecution/engine/SwitchWithPatterns.java"))
+      .withChecks(seChecks())
+      .withClassPath(SETestUtils.CLASS_PATH)
+      .withJavaVersion(17)
+      .verifyNoIssues();
   }
 
   @Test
@@ -675,7 +692,10 @@ class ExplodedGraphWalkerTest {
       ObjectOutputStreamCheck.class,
       MinMaxRangeCheck.class,
       ParameterNullnessCheck.class,
-      XxeProcessingCheck.class)
+      XxeProcessingCheck.class,
+      DenialOfServiceXMLCheck.class,
+      AllowXMLInclusionCheck.class,
+      XmlParserLoadsExternalSchemasCheck.class)
       .map(Class::getSimpleName)
       .collect(Collectors.toList());
     // Compute the list of SEChecks defined in package
