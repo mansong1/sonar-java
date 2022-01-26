@@ -27,21 +27,21 @@ pipeline:
                           - step:
                                 type: RunTests
                                 spec:
+                                    connectorRef: org.Dockerhub
+                                    image: <+build.variables.MAVEN_IMAGE>
+                                    language: Java
+                                    buildTool: Maven
+                                    args: test
                                     runOnlySelectedTests: true
-                                    resources:
-                                        limits:
-                                            memory: 4Gi
-                                            cpu: "2.0"
                                     reports:
                                         type: JUnit
                                         spec:
                                             paths:
                                                 - "**/*.xml"
-                                    language: Java
-                                    image: <+build.variables.MAVEN_IMAGE>
-                                    connectorRef: org.Dockerhub
-                                    buildTool: Maven
-                                    args: clean install
+                                    resources:
+                                        limits:
+                                            memory: 4Gi
+                                            cpu: "2.0"
                                 name: Run Tests
                                 identifier: Run_TI
                           - step:
