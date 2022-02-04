@@ -51,12 +51,6 @@ pipeline:
                                 name: Check Licence Compliance
                                 identifier: Check_Licence_Compliance
                           - step:
-                                template:
-                                    versionLabel: v1.0.0
-                                    templateRef: cleanup_maven_repository
-                                name: Clean Up Maven Repo
-                                identifier: Clean_Up_Maven_Repo
-                          - step:
                                 type: SaveCacheS3
                                 spec:
                                     connectorRef: org.AWS
