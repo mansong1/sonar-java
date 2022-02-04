@@ -31,7 +31,7 @@ pipeline:
                                     image: <+build.variables.MAVEN_IMAGE>
                                     language: Java
                                     buildTool: Maven
-                                    args: test
+                                    args: test -DskipTests
                                     runOnlySelectedTests: true
                                     reports:
                                         type: JUnit
@@ -57,28 +57,22 @@ pipeline:
                                 name: Clean Up Maven Repo
                                 identifier: Clean_Up_Maven_Repo
                           - step:
-                                type: Run
-                                spec:
-                                    image: bash:latest
-                                    connectorRef: org.Dockerhub
-                                    command: ls -larth
-                                name: echo
-                                identifier: echo
-                          - step:
                                 type: SaveCacheS3
                                 spec:
-                                    sourcePaths:
-                                        - /harness/.m2/repository
-                                    region: eu-west-1
-                                    override: true
-                                    key: sonar
                                     connectorRef: org.AWS
+                                    region: eu-west-1
                                     bucket: mansong-maven
+                                    key: sonar
+                                    sourcePaths:
+                                        - /root/.m2/repository
                                     archiveFormat: Gzip
+                                    override: true
                                 name: Save Maven Cache
                                 identifier: Save_Maven_Cache
                   cloneCodebase: true
-              name: build
+                  sharedPaths:
+                      - /root/.m2/repository
+              name: Build
               identifier: build
     properties:
         ci:
