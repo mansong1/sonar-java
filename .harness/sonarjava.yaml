@@ -17,13 +17,20 @@ pipeline:
                           - step:
                                 type: RestoreCacheS3
                                 spec:
-                                    region: eu-west-2
-                                    key: sonar
                                     connectorRef: org.AWS
+                                    region: eu-west-2
                                     bucket: mansong-maven
+                                    key: sonar
                                     archiveFormat: Gzip
                                 name: Restore Maven Cache
                                 identifier: Restore_Maven_Cache
+                                failureStrategies:
+                                    - onFailure:
+                                          errors:
+                                              - Timeout
+                                              - Unknown
+                                          action:
+                                              type: Ignore
                           - step:
                                 type: RunTests
                                 spec:
