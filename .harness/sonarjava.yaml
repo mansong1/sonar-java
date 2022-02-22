@@ -22,7 +22,7 @@ pipeline:
                                     bucket: mansong-maven
                                     key: sonar
                                     archiveFormat: Gzip
-                                name: Restore Maven Cache
+                                name: RestoreMavenCache
                                 identifier: Restore_Maven_Cache
                                 failureStrategies:
                                     - onFailure:
@@ -65,14 +65,15 @@ pipeline:
                                     bucket: mansong-maven
                                     key: sonar
                                     sourcePaths:
-                                        - /root/.m2/repository
+                                        - /home/sonarsource/.m2/repository
                                     archiveFormat: Gzip
                                     override: true
-                                name: Save Maven Cache
+                                name: MavenCache
                                 identifier: Save_Maven_Cache
                   cloneCodebase: true
                   sharedPaths:
-                      - /root/.m2/repository
+                      - /home/sonarsource/.m2/repository
+                      - /home/sonarsource/.m2
               name: Build
               identifier: build
     properties:
