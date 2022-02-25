@@ -87,3 +87,4 @@ pipeline:
     orgIdentifier: default
     name: sonar-java
     identifier: sonarjava
+    allowStageExecutions: true
