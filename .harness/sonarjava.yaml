@@ -40,7 +40,6 @@ pipeline:
                                     buildTool: Maven
                                     args: test
                                     runOnlySelectedTests: true
-                                    preCommand: chsh -s bash
                                     reports:
                                         type: JUnit
                                         spec:
