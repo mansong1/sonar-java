@@ -38,7 +38,7 @@ pipeline:
                                     image: <+build.variables.MAVEN_IMAGE>
                                     language: Java
                                     buildTool: Maven
-                                    args: test
+                                    args: clean -DskipTests
                                     runOnlySelectedTests: true
                                     reports:
                                         type: JUnit
